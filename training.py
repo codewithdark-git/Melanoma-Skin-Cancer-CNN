@@ -1,11 +1,27 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
+from torch.utils.data import DataLoader
+from torchvision import datasets, transforms, models
+from torchsummary import summary
 import numpy as np
-from melanomaNN import MelanomaCNN
+import tqdm
+import logging
+import os
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    handlers=[
+        logging.FileHandler("melanoma_processing.log"),
+        logging.StreamHandler(),
+    ],
+)
+
 
 class MelanomaClassifier:
-    def __init__(self, img_size=50, batch_size=100, learning_rate=0.001, epochs=2, model_path="saved_model.pth"):
+    def __init__(self, model, img_size=50, batch_size=100, learning_rate=0.001, epochs=2, model_path="Models"):
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.img_size = img_size
         self.batch_size = batch_size
         self.learning_rate = learning_rate
@@ -13,103 +29,106 @@ class MelanomaClassifier:
         self.model_path = model_path
 
         # Initialize model, optimizer, and loss function
-        self.net = MelanomaCNN()
+        if model is None:
+            raise ValueError("Please provide a valid model instance.")
+        self.net = model.to(self.device)
         self.optimizer = optim.Adam(self.net.parameters(), lr=self.learning_rate)
-        self.loss_function = nn.MSELoss()
+        self.loss_function = nn.CrossEntropyLoss()
 
-    def load_data(self, file_path, dataset_type="train"):
-        """Loads and preprocesses data from a saved .npz file."""
-        data = np.load(file_path, allow_pickle=True)
-        if dataset_type == "train":
-            X = torch.Tensor(data['train_images']) / 255.0  # Normalize pixel values
-            y = torch.Tensor(data['train_labels'])  # One-hot encoded labels
-        elif dataset_type == "test":
-            X = torch.Tensor(data['X_test']) / 255.0
-            y = torch.Tensor(data['Y_test'])
-        else:
-            raise ValueError("Invalid dataset_type. Choose 'train' or 'test'.")
-        return X, y
+    def transform_data(self, train_path, test_path):
+        """Transforms the data and loads it into DataLoader."""
+        if not os.path.exists(train_path) or not os.path.exists(test_path):
+            raise FileNotFoundError("Train or test path does not exist.")
 
-    def train(self, train_X, train_y):
-        """Trains the model."""
-        self.train_X = train_X
-        self.train_y = train_y
+        transform = transforms.Compose([
+            transforms.Resize((224, 224)),
+            transforms.Grayscale(num_output_channels=1),  # Convert to grayscale
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485], std=[0.229]),  # Adjust normalization for grayscale
+        ])
+
+        # Load datasets with transformations
+        train_dataset = datasets.ImageFolder(root=train_path, transform=transform)
+        test_dataset = datasets.ImageFolder(root=test_path, transform=transform)
+
+        train_loader = DataLoader(train_dataset, batch_size=self.batch_size, shuffle=True)
+        test_loader = DataLoader(test_dataset, batch_size=self.batch_size, shuffle=False)
+
+        logging.info(f"Train and test datasets loaded. Train size: {len(train_dataset)}, Test size: {len(test_dataset)}")
+        return train_loader, test_loader
+
+    def train_model(self, train_loader):
+        """Train the model with progress tracking using tqdm."""
+        self.net.train()  # Set model to training mode
+
         for epoch in range(self.epochs):
-            print(f"Starting epoch {epoch + 1}/{self.epochs}")
-            for i in range(0, len(self.train_X), self.batch_size):
+            progress_bar = tqdm.tqdm(train_loader, desc=f"Epoch {epoch + 1}/{self.epochs}", leave=True)
+            running_loss = 0.0
 
-                # Prepare batches
-                batch_X = self.train_X[i:i + self.batch_size].view(-1, 1, self.img_size, self.img_size)
-                batch_y = self.train_y[i:i + self.batch_size]
+            for i, (inputs, labels) in enumerate(progress_bar):
+                # Move data to the same device as the model
+                inputs, labels = inputs.to(self.device), labels.to(self.device)
 
                 # Zero the parameter gradients
                 self.optimizer.zero_grad()
 
                 # Forward pass
-                outputs = self.net(batch_X)
+                outputs = self.net(inputs)
+                loss = self.loss_function(outputs, labels)
 
-                # Compute loss
-                loss = self.loss_function(outputs, batch_y)
-
-                # Backward pass
+                # Backward pass and optimization
                 loss.backward()
-
-                # Update parameters
                 self.optimizer.step()
 
-                # Print progress
-                progress = (i + self.batch_size) / len(self.train_X) * 100
-                print(f"Epoch {epoch + 1}/{self.epochs}, Progress: {progress:.2f}% - Loss: {loss.item():.4f}")
+                # Update running loss
+                running_loss += loss.item()
 
-    def evaluate_accuracy(self, X, y, dataset_name="Validation"):
+                # Update progress bar description
+                progress_bar.set_description(f"Epoch {epoch + 1}/{self.epochs}, Loss: {loss.item():.4f}")
+
+            # Log epoch loss
+            epoch_loss = running_loss / len(train_loader)
+            logging.info(f"Epoch {epoch + 1}/{self.epochs} Loss: {epoch_loss:.4f}")
+
+    def evaluate_accuracy(self, data_loader, dataset_name="Validation"):
         """Evaluates the accuracy on the given dataset."""
+        self.net.eval()  # Set model to evaluation mode
         correct = 0
         total = 0
-        with torch.no_grad():
-            for i in range(0, len(X), self.batch_size):
-                batch_X = X[i:i + self.batch_size].view(-1, 1, self.img_size, self.img_size)
-                batch_y = y[i:i + self.batch_size]
 
-                outputs = self.net(batch_X)
+        with torch.no_grad():
+            for inputs, labels in data_loader:
+                inputs, labels = inputs.to(self.device), labels.to(self.device)
+                outputs = self.net(inputs)
                 predicted = torch.argmax(outputs, dim=1)
-                labels = torch.argmax(batch_y, dim=1)
 
                 correct += (predicted == labels).sum().item()
-                total += batch_y.size(0)
+                total += labels.size(0)
 
         accuracy = (correct / total) * 100
+        logging.info(f"{dataset_name} Accuracy: {accuracy:.2f}%")
         print(f"{dataset_name} Accuracy: {accuracy:.2f}%")
 
-    def save_model(self):
+    def summary_model(self):
+        """Displays a summary of the model architecture."""
+        return summary(self.net, input_size=(1, 224, 224), device=str(self.device))
+
+    def save_model(self, model_name="pretrained"):
         """Saves the trained model to a file."""
-        torch.save(self.net.state_dict(), self.model_path)
-        print(f"Model saved to {self.model_path}")
+        os.makedirs(self.model_path, exist_ok=True)
+        file_path = os.path.join(self.model_path, f"{model_name}_model.pth")
+        torch.save(self.net.state_dict(), file_path)
+        logging.info(f"Model saved to {file_path}")
+        print(f"Model saved to {file_path}")
 
-    def load_model(self):
+    def load_model(self, model_name="pretrained"):
         """Loads the model from a file."""
-        self.net.load_state_dict(torch.load(self.model_path))
+        file_path = os.path.join(self.model_path, f"{model_name}_model.pth")
+        if not os.path.exists(file_path):
+            raise FileNotFoundError(f"Model file not found at {file_path}")
+        self.net.load_state_dict(torch.load(file_path, map_location=self.device))
         self.net.eval()
-        print(f"Model loaded from {self.model_path}")
+        logging.info(f"Model loaded from {file_path}")
+        print(f"Model loaded from {file_path}")
 
-# if __name__ == "__main__":
-#     # Hyperparameters and file paths
-#     IMG_SIZE = 224
-#     BATCH_SIZE = 32
-#     LEARNING_RATE = 0.001
-#     EPOCHS = 2
-#     MODEL_PATH = "Models/saved_model.pth"
-#     DATA_PATH = "melanoma_dataset.npz"
 
-#     # Create classifier instance
-#     classifier = MelanomaClassifier(img_size=IMG_SIZE, batch_size=BATCH_SIZE, learning_rate=LEARNING_RATE, epochs=EPOCHS, model_path=MODEL_PATH)
-
-#     # Load training data and train the model
-#     train_X, train_y = classifier.load_data(DATA_PATH, dataset_type="train")
-#     classifier.train(train_X, train_y)
-#     classifier.evaluate_accuracy(train_X, train_y, dataset_name="Training")
-#     classifier.save_model()
-
-    # # Load testing data and evaluate the model
-    # test_X, test_y = classifier.load_data(DATA_PATH, dataset_type="train")
-    # classifier.load_model()
-    # classifier.evaluate_accuracy(test_X, test_y, dataset_name="Testing")
