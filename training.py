@@ -8,25 +8,19 @@ import numpy as np
 import tqdm
 import logging
 import os
+from config import logging, device
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s",
-    handlers=[
-        logging.FileHandler("melanoma_processing.log"),
-        logging.StreamHandler(),
-    ],
-)
 
 
 class MelanomaClassifier:
-    def __init__(self, model, img_size=50, batch_size=100, learning_rate=0.001, epochs=2, model_path="Models"):
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    def __init__(self, model, model_name, img_size=50, batch_size=100, learning_rate=0.001, epochs=2, model_path="Models"):
+        self.device = device
         self.img_size = img_size
         self.batch_size = batch_size
         self.learning_rate = learning_rate
         self.epochs = epochs
         self.model_path = model_path
+        self.model_name = model_name
 
         # Initialize model, optimizer, and loss function
         if model is None:
@@ -35,30 +29,24 @@ class MelanomaClassifier:
         self.optimizer = optim.Adam(self.net.parameters(), lr=self.learning_rate)
         self.loss_function = nn.CrossEntropyLoss()
 
-    def transform_data(self, train_path, test_path):
-        """Transforms the data and loads it into DataLoader."""
-        if not os.path.exists(train_path) or not os.path.exists(test_path):
-            raise FileNotFoundError("Train or test path does not exist.")
-
-        transform = transforms.Compose([
-            transforms.Resize((224, 224)),
-            transforms.Grayscale(num_output_channels=1),  # Convert to grayscale
-            transforms.ToTensor(),
-            transforms.Normalize(mean=[0.485], std=[0.229]),  # Adjust normalization for grayscale
-        ])
-
-        # Load datasets with transformations
-        train_dataset = datasets.ImageFolder(root=train_path, transform=transform)
-        test_dataset = datasets.ImageFolder(root=test_path, transform=transform)
-
-        train_loader = DataLoader(train_dataset, batch_size=self.batch_size, shuffle=True)
-        test_loader = DataLoader(test_dataset, batch_size=self.batch_size, shuffle=False)
-
-        logging.info(f"Train and test datasets loaded. Train size: {len(train_dataset)}, Test size: {len(test_dataset)}")
-        return train_loader, test_loader
 
     def train_model(self, train_loader):
         """Train the model with progress tracking using tqdm."""
+        print(f"""
+              
+                ****************************************
+                ||=    Training MelanomaClassifier
+                ||=    -------------------------------
+                ||=    Batch size: {self.batch_size}
+                ||=    Learning rate: {self.learning_rate}
+                ||=    Epochs: {self.epochs}
+                ||=    Model path: {self.model_path}
+                ||=    Device: {self.device}
+                ||=    Model : {self.model_name}
+                ****************************************
+        
+            """)
+        self.net.to(self.device)
         self.net.train()  # Set model to training mode
 
         for epoch in range(self.epochs):
@@ -113,10 +101,10 @@ class MelanomaClassifier:
         """Displays a summary of the model architecture."""
         return summary(self.net, input_size=(1, 224, 224), device=str(self.device))
 
-    def save_model(self, model_name="pretrained"):
+    def save_model(self):
         """Saves the trained model to a file."""
         os.makedirs(self.model_path, exist_ok=True)
-        file_path = os.path.join(self.model_path, f"{model_name}_model.pth")
+        file_path = os.path.join(self.model_path, f"{self.model_name}_model.pth")
         torch.save(self.net.state_dict(), file_path)
         logging.info(f"Model saved to {file_path}")
         print(f"Model saved to {file_path}")
