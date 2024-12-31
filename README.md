@@ -1,4 +1,4 @@
-### Melanoma Classification Project Documentation >>>>
+### Melanoma Classification Project Documentation
 
 ---
 
@@ -17,10 +17,16 @@ This project focuses on detecting melanoma (a type of skin cancer) using Convolu
        - Benign: `melanoma_cancer_dataset/train/benign`, `melanoma_cancer_dataset/test/benign`
        - Malignant: `melanoma_cancer_dataset/train/malignant`, `melanoma_cancer_dataset/test/malignant`
    - **Processor**:
-     - The `MelanomaDataProcessor` class handles loading, resizing, and normalizing images to grayscale with dimensions of 224x224 pixels.
-     - It balances the training data by ensuring the number of benign samples matches the number of malignant samples.
+     - The `ImageFolder` class from PyTorch is used to load and process the dataset efficiently.
+     - Images are resized to 224x224 pixels and normalized using standard ImageNet mean and standard deviation values.
+   - **Data Augmentation**:
+     - PyTorch's `torchvision.transforms` is utilized to apply augmentation techniques, including:
+       - Random flipping (horizontal/vertical).
+       - Random rotation (up to 30 degrees).
+       - Scaling and cropping.
+       - Adding Gaussian noise.
    - **Output**:
-     - Saves processed data as `melanoma_dataset.npz` for easy loading during training/testing.
+     - The processed dataset is used directly during training/testing via DataLoader for efficient batching and augmentation on-the-fly.
 
 2. **Model Architecture**
    - **Model**: `MelanomaCNN`
@@ -33,10 +39,12 @@ This project focuses on detecting melanoma (a type of skin cancer) using Convolu
        - Output layer with 2 neurons for benign and malignant probabilities (softmax activation).
    - **Input Shape**: `(batch_size, 1, 224, 224)`
    - **Output Shape**: `(batch_size, 2)`
+   - **Model Improvements**:
+     - Pretrained models such as ResNet18 are used for transfer learning to enhance performance.
 
 3. **Training**
    - **Data**:
-     - Train dataset loaded from `melanoma_dataset.npz`.
+     - Training and testing datasets are loaded using PyTorch DataLoader for batching and shuffling.
      - Images normalized to a [0, 1] range by dividing pixel values by 255.
    - **Hyperparameters**:
      - Learning Rate: `0.0001`
@@ -45,7 +53,7 @@ This project focuses on detecting melanoma (a type of skin cancer) using Convolu
    - **Optimizer**:
      - Adam optimizer used for efficient gradient-based optimization.
    - **Loss Function**:
-     - Mean Squared Error (MSE) loss to measure prediction error.
+     - Cross-entropy loss is used for better classification performance.
    - **Training Loop**:
      - For each epoch, data is divided into batches.
      - Forward pass calculates predictions, and loss is computed.
@@ -55,9 +63,12 @@ This project focuses on detecting melanoma (a type of skin cancer) using Convolu
 4. **Evaluation**
    - **Metrics**:
      - Accuracy calculated as the ratio of correct predictions to the total number of samples.
+     - Additional metrics such as precision, recall, and F1-score are included for robust evaluation.
    - **Testing Accuracy**: **85.20%**
    - **Evaluation Loop**:
      - The model is evaluated on unseen test data using the same batch size as training.
+   - **Visualization**:
+     - Grad-CAM is integrated to visualize important regions in images contributing to predictions.
 
 5. **Model Saving**
    - The trained model is saved as `Models/saved_model.pth` for reuse or further evaluation.
@@ -67,11 +78,10 @@ This project focuses on detecting melanoma (a type of skin cancer) using Convolu
 #### **Key Classes and Functions**
 
 1. **MelanomaDataProcessor**
-   - Handles image preprocessing and dataset preparation.
+   - Handles image preprocessing and dataset preparation using PyTorch utilities.
    - Key Methods:
-     - `load_and_process_image(image_path)`: Loads, converts to grayscale, resizes, and normalizes an image.
-     - `process_directory(directory, label)`: Processes all images in a directory and assigns labels.
-     - `process_dataset(data_config)`: Processes the entire dataset and returns training and testing splits.
+     - `ImageFolder`: Loads images from the directory and applies preprocessing transforms.
+     - `DataLoader`: Batches the dataset and ensures efficient shuffling/loading during training/testing.
 
 ![MelanomaCNN](diagram.png)
 
@@ -82,13 +92,13 @@ This project focuses on detecting melanoma (a type of skin cancer) using Convolu
      - `get_feature_dims(input_size)`: Debugging utility to calculate feature dimensions at each layer.
 
 3. **Training Script**
-   - Prepares data tensors (`train_X`, `train_y`).
+   - Prepares data loaders (`train_loader`, `test_loader`).
    - Initializes the `MelanomaCNN` model.
-   - Executes training using `Adam` optimizer and computes loss using `MSELoss`.
+   - Executes training using `Adam` optimizer and computes loss using `CrossEntropyLoss`.
 
 4. **Evaluation Script**
    - Runs the model in evaluation mode.
-   - Computes accuracy for both training and testing datasets.
+   - Computes accuracy, precision, recall, and F1-score for both training and testing datasets.
 
 ---
 
@@ -106,32 +116,18 @@ This project focuses on detecting melanoma (a type of skin cancer) using Convolu
 - **Training Accuracy**: **85.52%**
 - **Testing Accuracy**: **85.20%**
 
-
-### *Performance Metrics with pre-train**
+### *Performance Metrics with Pre-trained Models*
+- **Pretrained Model**: ResNet18
 - **Training Accuracy**: **94.22%**
 - **Testing Accuracy**: **91.10%**
----
-
-#### **Future Enhancements**
-1. **Data Augmentation**:
-   - Introduce techniques like flipping, rotation, and scaling to improve generalization.
-2. **Loss Function**:
-   - Experiment with cross-entropy loss for better classification performance.
-3. **Additional Metrics**:
-   - Include precision, recall, and F1-score for more robust evaluation.
-4. **Hyperparameter Tuning**:
-   - Optimize learning rate, batch size, and number of epochs.
-5. **Model Improvements**:
-   - Use pretrained models like ResNet or VGG16 for transfer learning.
-6. **Visualization**:
-   - Integrate Grad-CAM to visualize important regions in images contributing to predictions.
 
 ---
 
 #### **File Structure**
+``` python
 .
-Melamoma-Skin-cancer
-├── melamoma_cancer_dataset
+Melanoma-Skin-Cancer
+├── melanoma_cancer_dataset
 │   ├── test
 │   │   ├── melanoma
 │   │   └── benign
@@ -139,16 +135,15 @@ Melamoma-Skin-cancer
 |       ├── melanoma
 |       └── benign
 ├── melanoma_dataset.npz    # NumPy Array for the dataset (train_X, train_Y, test_X, test_Y)
-├── melanoma_processing.log # store the log of the full Pipeline
+├── melanoma_processing.log # Store the log of the full pipeline
 ├── Models
 │   └── saved_model.pth
-├── demo.py                  # demo script test model on data
+├── demo.py                  # Demo script to test model on data
 ├── melanomaNN.py            # Neural network model definition
-├── preprocessing.py         # processing data from dataset
+├── preprocessing.py         # Processing data from dataset
 ├── training.py              # Training script
 ├── testing.py               # Testing script
-├── main.py                  # Main is Full Pipeline (from preprocessing --> evaluate the model accuracy)
+├── main.py                  # Full pipeline (from preprocessing to evaluation)
 └── README.md
-
-
+```
 
