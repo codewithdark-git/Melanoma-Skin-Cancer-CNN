@@ -6,8 +6,6 @@ __pycache__/
 # C extensions
 *.so
 
-melanoma_dataset.npz
-
 
 # Distribution / packaging
 .Python
@@ -173,4 +171,4 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 *.npz
-melanoma_dataset.npz
+
