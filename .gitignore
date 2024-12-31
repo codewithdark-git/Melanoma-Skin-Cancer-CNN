@@ -7,7 +7,7 @@ __pycache__/
 *.so
 
 *.pth
-
+*.npz
 
 # Distribution / packaging
 .Python
