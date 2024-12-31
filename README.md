@@ -95,14 +95,16 @@ Melamoma-Skin-cancer
 │   └── train
 |       ├── melanoma
 |       └── benign
-├── melanoma_dataset.npz
-├── melanoma_processing.log
+├── melanoma_dataset.npz    # NumPy Array for the dataset (train_X, train_Y, test_X, test_Y)
+├── melanoma_processing.log # store the log of the full Pipeline
 ├── Models
 │   └── saved_model.pth
-├── demo.py                  # Main demo script
+├── demo.py                  # demo script test model on data
 ├── melanomaNN.py            # Neural network model definition
 ├── preprocessing.py         # processing data from dataset
 ├── training.py              # Training script
+├── testing.py               # Testing script
+├── main.py                  # Main is Full Pipeline (from preprocessing --> evaluate the model accuracy)
 └── README.md
 ```
 

@@ -42,12 +42,12 @@ class MelanomaCNN(nn.Module):
         )
         
         # Fully connected layers
-        self.fc1 = nn.Linear(128 * 2 * 2, 512)
+        self.fc1 = nn.Linear(128*24*24, 512) #128 * 2 * 2
         self.fc2 = nn.Linear(512, 2)
         
     def forward(self, x):
         """
-        Forward pass through the network.
+        Forward pass through the network
         
         Args:
             x (torch.Tensor): Input tensor of shape (batch_size, 1, 50, 50)
@@ -69,9 +69,10 @@ class MelanomaCNN(nn.Module):
         x = self.conv3(x)
         x = F.relu(x)
         x = F.max_pool2d(x, kernel_size=(2, 2))
+        print('X shape', x.shape)
         
         # Flatten the tensor for fully connected layers
-        x = x.view(-1, 128 * 2 * 2)
+        x = x.view(-1, 128*24*24)
         
         # Fully connected layers
         x = self.fc1(x)
@@ -82,7 +83,7 @@ class MelanomaCNN(nn.Module):
         
         return x
     
-    def get_feature_dims(self, input_size=(1, 50, 50)):
+    def get_feature_dims(self, input_size=(1, 224, 224)):
         """
         Calculate feature dimensions at each layer.
         Useful for debugging and architecture visualization.
@@ -109,6 +110,8 @@ class MelanomaCNN(nn.Module):
         dims['conv3'] = x.shape
         
         # Flattened
-        dims['flatten'] = (x.view(-1, 128 * 2 * 2)).shape
+        dims['flatten'] = (x.view(-1, 128*24*24)).shape
         
         return dims
+
+

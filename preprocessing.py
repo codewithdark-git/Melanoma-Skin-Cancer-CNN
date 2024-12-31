@@ -123,27 +123,27 @@ class MelanomaDataProcessor:
         logging.info(f"Total training samples: {ben_train + mal_train}")
         logging.info(f"Total testing samples: {ben_test + mal_test}")
 
-def main():
-    # Configuration
-    data_config = {
-        'ben_training_folder': "melanoma_cancer_dataset/train/benign",
-        'mal_training_folder': "melanoma_cancer_dataset/train/malignant",
-        'ben_testing_folder': "melanoma_cancer_dataset/test/benign",
-        'mal_testing_folder': "melanoma_cancer_dataset/test/malignant"
-    }
+# def main():
+#     # Configuration
+#     data_config = {
+#         'ben_training_folder': "melanoma_cancer_dataset/train/benign",
+#         'mal_training_folder': "melanoma_cancer_dataset/train/malignant",
+#         'ben_testing_folder': "melanoma_cancer_dataset/test/benign",
+#         'mal_testing_folder': "melanoma_cancer_dataset/test/malignant"
+#     }
     
-    # Initialize and run processor
-    processor = MelanomaDataProcessor(img_size=50)
-    (train_images, train_labels), (test_images, test_labels) = processor.process_dataset(data_config)
+#     # Initialize and run processor
+#     processor = MelanomaDataProcessor(img_size=224)
+#     (train_images, train_labels), (test_images, test_labels) = processor.process_dataset(data_config)
     
-    # Save processed data
-    np.savez_compressed(
-        'melanoma_dataset.npz',
-        train_images=train_images,
-        train_labels=train_labels,
-        test_images=test_images,
-        test_labels=test_labels
-    )
+#     # Save processed data
+#     np.savez_compressed(
+#         'melanoma_dataset.npz',
+#         train_images=train_images,
+#         train_labels=train_labels,
+#         test_images=test_images,
+#         test_labels=test_labels
+#     )
     
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()
