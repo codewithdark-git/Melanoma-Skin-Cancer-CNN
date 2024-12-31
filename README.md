@@ -49,7 +49,7 @@ This project focuses on detecting melanoma (a type of skin cancer) using Convolu
    - **Hyperparameters**:
      - Learning Rate: `0.0001`
      - Batch Size: `32`
-     - Epochs: `2`
+     - Epochs: `10`
    - **Optimizer**:
      - Adam optimizer used for efficient gradient-based optimization.
    - **Loss Function**:
@@ -58,7 +58,7 @@ This project focuses on detecting melanoma (a type of skin cancer) using Convolu
      - For each epoch, data is divided into batches.
      - Forward pass calculates predictions, and loss is computed.
      - Backward pass updates weights using gradients.
-     - Training accuracy achieved: **85.52%**
+     - Training accuracy achieved: **99.04%**
 
 4. **Evaluation**
    - **Metrics**:
@@ -113,13 +113,13 @@ This project focuses on detecting melanoma (a type of skin cancer) using Convolu
 ---
 
 #### **Performance Metrics**
-- **Training Accuracy**: **85.52%**
-- **Testing Accuracy**: **85.20%**
+- **Training Accuracy**: **98.72%**
+- **Testing Accuracy**: **99.04%**
 
 ### *Performance Metrics with Pre-trained Models*
 - **Pretrained Model**: ResNet18
-- **Training Accuracy**: **94.22%**
-- **Testing Accuracy**: **91.10%**
+- **Training Accuracy**: **93.60%**
+- **Testing Accuracy**: **95.98%**
 
 ---
 
@@ -143,7 +143,10 @@ Melanoma-Skin-Cancer
 ├── preprocessing.py         # Processing data from dataset
 ├── training.py              # Training script
 ├── testing.py               # Testing script
-├── main.py                  # Full pipeline (from preprocessing to evaluation)
+├── pipeline.py              # Full pipeline (from preprocessing to evaluation)
+├── config.py                # Configuration
+├── dataset.py               # pytorch dataset and dataloader
+├── streamlit.py             # streamlit UI for testing life data
 └── README.md
 ```
 
