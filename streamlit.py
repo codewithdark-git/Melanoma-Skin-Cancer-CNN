@@ -108,7 +108,7 @@ def main():
         with col2:
             if prediction and confidence:
                 st.metric(label="Prediction", value=prediction)  # Display prediction in the second column
-                st.metric(label="Confidence", value=f"{confidence*100} %")  # Display confidence in the second column
+                st.metric(label="Confidence", value=f"{confidence*100:.2f} %")  # Display confidence in the second column
             else:
                 st.write("An error occurred. Could not make a prediction.")
 

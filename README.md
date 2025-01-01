@@ -28,6 +28,8 @@ This project focuses on detecting melanoma (a type of skin cancer) using Convolu
    - **Output**:
      - The processed dataset is used directly during training/testing via DataLoader for efficient batching and augmentation on-the-fly.
 
+[Model Architecture](model_architecture1.pdf)
+
 2. **Model Architecture**
    - **Model**: `MelanomaCNN`
    - **Structure**:
@@ -58,13 +60,13 @@ This project focuses on detecting melanoma (a type of skin cancer) using Convolu
      - For each epoch, data is divided into batches.
      - Forward pass calculates predictions, and loss is computed.
      - Backward pass updates weights using gradients.
-     - Training accuracy achieved: **99.04%**
+     - Training accuracy achieved: **89.02%**
 
 4. **Evaluation**
    - **Metrics**:
      - Accuracy calculated as the ratio of correct predictions to the total number of samples.
      - Additional metrics such as precision, recall, and F1-score are included for robust evaluation.
-   - **Testing Accuracy**: **85.20%**
+   - **Testing Accuracy**: **90.20%**
    - **Evaluation Loop**:
      - The model is evaluated on unseen test data using the same batch size as training.
    - **Visualization**:
@@ -113,13 +115,13 @@ This project focuses on detecting melanoma (a type of skin cancer) using Convolu
 ---
 
 #### **Performance Metrics**
-- **Training Accuracy**: **98.72%**
-- **Testing Accuracy**: **99.04%**
+- **Training Accuracy**: **89.02%**
+- **Testing Accuracy**: **90.40%**
 
 ### *Performance Metrics with Pre-trained Models*
 - **Pretrained Model**: ResNet18
 - **Training Accuracy**: **93.60%**
-- **Testing Accuracy**: **95.98%**
+- **Testing Accuracy**: **91.98%**
 
 ---
 
@@ -150,3 +152,6 @@ Melanoma-Skin-Cancer
 └── README.md
 ```
 
+#### Grad-CAM Visualization for Melanoma Classification:
+
+[Grad-CAM Visualization](output.png)
