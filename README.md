@@ -28,9 +28,9 @@ This project focuses on detecting melanoma (a type of skin cancer) using Convolu
    - **Output**:
      - The processed dataset is used directly during training/testing via DataLoader for efficient batching and augmentation on-the-fly.
 
-<embed src="model_architecture1.pdf" width="800" height="600">
+[Model Architecture](model_architecture.png)
 
-1. **Model Architecture**
+2. **Model Architecture**
    - **Model**: `MelanomaCNN`
    - **Structure**:
      - **Convolutional Layers**:
@@ -44,7 +44,7 @@ This project focuses on detecting melanoma (a type of skin cancer) using Convolu
    - **Model Improvements**:
      - Pretrained models such as ResNet18 are used for transfer learning to enhance performance.
 
-2. **Training**
+3. **Training**
    - **Data**:
      - Training and testing datasets are loaded using PyTorch DataLoader for batching and shuffling.
      - Images normalized to a [0, 1] range by dividing pixel values by 255.
@@ -62,7 +62,7 @@ This project focuses on detecting melanoma (a type of skin cancer) using Convolu
      - Backward pass updates weights using gradients.
      - Training accuracy achieved: **89.02%**
 
-3. **Evaluation**
+4. **Evaluation**
    - **Metrics**:
      - Accuracy calculated as the ratio of correct predictions to the total number of samples.
      - Additional metrics such as precision, recall, and F1-score are included for robust evaluation.
@@ -72,7 +72,7 @@ This project focuses on detecting melanoma (a type of skin cancer) using Convolu
    - **Visualization**:
      - Grad-CAM is integrated to visualize important regions in images contributing to predictions.
 
-4. **Model Saving**
+5. **Model Saving**
    - The trained model is saved as `Models/saved_model.pth` for reuse or further evaluation.
 
 ---
