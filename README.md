@@ -28,7 +28,7 @@ This project focuses on detecting melanoma (a type of skin cancer) using Convolu
    - **Output**:
      - The processed dataset is used directly during training/testing via DataLoader for efficient batching and augmentation on-the-fly.
 
-[Model Architecture](model_architecture.png)
+![Model Architecture](model_architecture1.png)
 
 2. **Model Architecture**
    - **Model**: `MelanomaCNN`
