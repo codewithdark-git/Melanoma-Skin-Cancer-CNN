@@ -154,4 +154,4 @@ Melanoma-Skin-Cancer
 
 #### Grad-CAM Visualization for Melanoma Classification:
 
-![Grad-CAM Visualization](output.png)
+![Grad-CAM Visualization](images/output.png)
