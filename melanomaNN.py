@@ -38,12 +38,6 @@ class MelanomaCNN(nn.Module):
             kernel_size=5
         )
 
-        # Fully connected layers
-        # After three convolutional layers with max pooling, the input to the fully connected layers will have the following dimensions:
-        # input_size = (224, 224)
-        # After conv1 + pooling -> (32, 220, 220)
-        # After conv2 + pooling -> (64, 108, 108)
-        # After conv3 + pooling -> (128, 52, 52)
         self.fc1 = nn.Linear(128 * 24 * 24, 512)  # Flattened size from conv3
         self.fc2 = nn.Linear(512, 2)
 
